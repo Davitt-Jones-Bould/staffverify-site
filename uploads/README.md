@@ -10,6 +10,7 @@ GitHub Pages URL (user site or project site).
 | `logo.svg` | Favicon, and the header mark until you add `icon.png` |
 | `fonts/bricolage-grotesque.woff2` | Headings and code digits (SIL Open Font License) |
 | `fonts/atkinson-400.woff2`, `fonts/atkinson-700.woff2` | Body text (SIL Open Font License) |
+| `fonts/bricolage-grotesque-OFL.txt`, `fonts/atkinson-hyperlegible-OFL.txt` | The fonts' licences. The OFL asks for its text to go wherever the fonts do, so keep these with them |
 
 ## Drop these in and they appear automatically
 
