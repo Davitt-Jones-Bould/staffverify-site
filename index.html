@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Staff Verify: confirm a caller is a colleague, in seconds</title>
+<meta name="description" content="Staff Verify lets staff confirm that a caller really works where they say they do, using a six-digit code that changes every 60 seconds.">
+<meta name="theme-color" content="#4338ca">
+<link rel="icon" href="uploads/logo.svg" type="image/svg+xml">
+<link rel="preload" href="uploads/fonts/bricolage-grotesque.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face {
+  font-family: "Bricolage Grotesque";
+  src: url("uploads/fonts/bricolage-grotesque.woff2") format("woff2");
+  font-weight: 200 800;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  src: url("uploads/fonts/atkinson-400.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  src: url("uploads/fonts/atkinson-700.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+
+:root {
+  --indigo: #4338ca;
+  --indigo-deep: #2e2599;
+  --ink: #16143a;
+  --muted: #54547a;
+  --paper: #ffffff;
+  --mist: #eef0fb;
+  --line: #d6d9ef;
+  --ok: #0b7a4f;
+  --ok-tint: #e3f5ec;
+  --no: #b3261e;
+  --no-tint: #fbe9e7;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --wrap: 1120px;
+  --gutter: clamp(20px, 5vw, 48px);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  font-family: var(--body);
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: var(--ink);
+  background: var(--paper);
+}
+h1, h2, h3, p, ol, ul, dl, dd, figure { margin: 0; padding: 0; }
+ol, ul { list-style: none; }
+a { color: inherit; }
+img, svg { display: block; max-width: 100%; }
+:focus-visible { outline: 3px solid #ffb020; outline-offset: 3px; border-radius: 4px; }
+
+.wrap { max-width: var(--wrap); margin-inline: auto; padding-inline: var(--gutter); }
+
+h1, h2, h3 { font-family: var(--display); letter-spacing: -0.02em; }
+h2 { font-size: clamp(1.9rem, 3.4vw, 2.75rem); line-height: 1.08; font-weight: 700; max-width: 20ch; text-wrap: balance; }
+h3 { font-size: 1.3rem; line-height: 1.2; font-weight: 650; letter-spacing: -0.01em; }
+.lede { font-size: 1.2rem; color: var(--muted); max-width: 56ch; }
+
+/* ---------- buttons ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 52px; padding: 0 26px;
+  font: 700 1.05rem/1 var(--body);
+  text-decoration: none; border-radius: 999px;
+  border: 2px solid transparent; cursor: pointer;
+}
+.btn-light { background: #fff; color: var(--indigo-deep); }
+.btn-light:hover { background: var(--mist); }
+.btn-outline-light { border-color: rgba(255,255,255,.6); color: #fff; }
+.btn-outline-light:hover { border-color: #fff; background: rgba(255,255,255,.1); }
+.btn-solid { background: var(--indigo); color: #fff; }
+.btn-solid:hover { background: var(--indigo-deep); }
+.btn-outline { border-color: var(--indigo); color: var(--indigo-deep); }
+.btn-outline:hover { background: var(--mist); }
+
+/* ---------- top band: header + hero ---------- */
+.top { background: var(--indigo); color: #fff; }
+.masthead { display: flex; align-items: center; justify-content: space-between; padding-block: 22px; }
+.brand { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; font: 700 1.3rem/1 var(--display); letter-spacing: -0.01em; }
+.brand-mark { width: 40px; height: 40px; border-radius: 10px; overflow: hidden; flex: none; box-shadow: 0 0 0 2px rgba(255,255,255,.35); }
+.brand-mark img, .brand-mark svg { width: 100%; height: 100%; object-fit: cover; }
+.masthead nav { display: flex; gap: 28px; font-size: 1rem; }
+.masthead nav a { text-decoration: none; opacity: .88; }
+.masthead nav a:hover { opacity: 1; text-decoration: underline; text-underline-offset: 5px; }
+
+.hero {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: clamp(32px, 5vw, 72px); align-items: center;
+  padding-block: clamp(36px, 6vw, 80px) clamp(56px, 8vw, 104px);
+}
+.hero h1 {
+  font-size: clamp(2.5rem, 4.9vw, 4.1rem);
+  line-height: 1.0; font-weight: 750; letter-spacing: -0.035em;
+  max-width: 15ch; text-wrap: balance;
+}
+.hero-sub { margin-top: 24px; font-size: 1.25rem; max-width: 40ch; color: #e4e3fb; }
+.hero-actions { margin-top: 34px; display: flex; flex-wrap: wrap; gap: 14px; }
+
+/* ---------- the live demo ---------- */
+.demo { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(14px, 2.4vw, 28px); }
+.demo-col { min-width: 0; display: flex; flex-direction: column; }
+.demo-who { font: 700 1rem/1.3 var(--body); margin-bottom: 12px; color: #fff; }
+.phone {
+  background: var(--ink); border-radius: 34px; padding: 9px;
+  box-shadow: 0 30px 60px -24px rgba(8, 5, 60, .75);
+  flex: 1; display: flex;
+}
+.screen {
+  background: #fff; color: var(--ink); border-radius: 26px;
+  flex: 1; min-width: 0; min-height: 420px; padding: 18px 16px 20px;
+  display: flex; flex-direction: column;
+  font-size: .95rem; line-height: 1.4;
+}
+.app-bar { display: flex; align-items: center; gap: 8px; font: 700 .95rem/1 var(--display); color: var(--indigo-deep); padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.app-bar svg { width: 22px; height: 22px; border-radius: 6px; }
+.screen-title { margin-top: 16px; font: 650 1.1rem/1.2 var(--display); }
+.screen-note { color: var(--muted); font-size: .875rem; margin-top: 4px; }
+
+.code-face { margin: auto 0; padding: 14px 0; display: grid; justify-items: center; gap: 16px; }
+.ring { position: relative; width: 148px; height: 148px; }
+.ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.ring circle { fill: none; stroke-width: 7; }
+.ring .track { stroke: var(--mist); }
+.ring .sweep { stroke: var(--indigo); stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
+.ring-num { position: absolute; inset: 0; display: grid; place-items: center; font: 700 2.3rem/1 var(--display); color: var(--indigo-deep); font-variant-numeric: tabular-nums; }
+.ring-num small { display: block; font: 400 .75rem/1 var(--body); color: var(--muted); margin-top: 4px; text-align: center; }
+.code {
+  font: 750 clamp(1.9rem, 3.3vw, 2.6rem)/1 var(--display);
+  letter-spacing: .04em; font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.code span + span { margin-left: .32em; }
+
+.field-label { display: block; margin-top: 16px; font-size: .875rem; color: var(--muted); }
+.fake-search {
+  margin-top: 6px; display: flex; align-items: center; gap: 8px;
+  border: 1.5px solid var(--line); border-radius: 12px; padding: 10px 12px; background: #fafbff;
+}
+.fake-search svg { width: 16px; height: 16px; flex: none; color: var(--muted); }
+.person { margin-top: 8px; display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 12px; background: var(--mist); }
+.avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--indigo); color: #fff; display: grid; place-items: center; font: 700 .8rem/1 var(--display); flex: none; }
+.person b { display: block; line-height: 1.2; }
+.person div span { font-size: .8rem; color: var(--muted); }
+
+.code-input {
+  margin-top: 6px; width: 100%;
+  font: 700 1.5rem/1 var(--display); letter-spacing: .22em; text-align: center;
+  font-variant-numeric: tabular-nums;
+  padding: 12px 6px; border: 2px solid var(--indigo); border-radius: 12px;
+  color: var(--ink); background: #fff;
+}
+.code-input::placeholder { color: #b9bbdc; letter-spacing: .22em; }
+.check-btn {
+  margin-top: 10px; width: 100%; min-height: 46px;
+  border: 0; border-radius: 12px; background: var(--indigo); color: #fff;
+  font: 700 1rem/1 var(--body); cursor: pointer;
+}
+.check-btn:hover { background: var(--indigo-deep); }
+.result {
+  margin-top: 12px; border-radius: 12px; padding: 12px;
+  display: flex; gap: 10px; align-items: flex-start;
+  font-size: .9rem; line-height: 1.35;
+  background: var(--mist); color: var(--muted);
+}
+.result svg { width: 22px; height: 22px; flex: none; margin-top: 1px; }
+.result b { display: block; color: inherit; }
+.result[data-state="ok"] { background: var(--ok-tint); color: var(--ok); }
+.result[data-state="no"] { background: var(--no-tint); color: var(--no); }
+.result[data-state="ok"], .result[data-state="no"] { animation: settle .28s ease-out; }
+@keyframes settle { from { transform: scale(.96); opacity: .4; } to { transform: none; opacity: 1; } }
+
+.demo-caption { grid-column: 1 / -1; font-size: .95rem; color: #d9d8f8; margin-top: 4px; text-wrap: pretty; }
+.demo-caption button {
+  font: inherit; color: #fff; background: none; border: 0; padding: 0;
+  text-decoration: underline; text-underline-offset: 4px; cursor: pointer;
+}
+
+/* ---------- sections ---------- */
+.band { padding-block: clamp(64px, 9vw, 120px); }
+.band-mist { background: var(--mist); }
+
+.why { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: clamp(28px, 6vw, 88px); align-items: start; }
+.why-body p + p { margin-top: 1.1em; }
+.why-body p { max-width: 58ch; }
+.calls { margin-top: 28px; border-top: 1px solid var(--line); }
+.calls li { padding: 14px 0; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 11ch 1fr; gap: 16px; }
+.calls b { font-family: var(--display); font-weight: 650; }
+.calls span { color: var(--muted); }
+
+.steps { margin-top: clamp(36px, 5vw, 60px); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(24px, 4vw, 56px); counter-reset: step; }
+.steps li { counter-increment: step; position: relative; padding-top: 26px; border-top: 3px solid var(--indigo); }
+.steps li::before {
+  content: counter(step);
+  display: block; font: 750 4.2rem/0.9 var(--display); letter-spacing: -0.04em;
+  color: var(--indigo); margin-bottom: 18px;
+}
+.steps p { margin-top: 10px; color: var(--muted); max-width: 34ch; }
+
+.features { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); gap: clamp(28px, 6vw, 88px); align-items: start; }
+.features .lede { margin-top: 18px; }
+.feature-list { border-top: 1px solid var(--line); }
+.feature-list div { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 20px; padding: 22px 0; border-bottom: 1px solid var(--line); align-items: baseline; }
+.feature-list dt { font: 650 1.25rem/1.25 var(--display); letter-spacing: -0.01em; }
+.feature-list dd { color: var(--muted); }
+
+.shots { margin-top: 40px; display: flex; flex-wrap: wrap; gap: 28px; }
+.shots img { height: 520px; width: auto; border-radius: 22px; border: 1px solid var(--line); background: #fff; }
+
+.safe { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(24px, 4vw, 56px); margin-top: clamp(32px, 4vw, 52px); }
+.safe li { padding-left: 20px; border-left: 3px solid var(--ok); }
+.safe p { margin-top: 8px; color: var(--muted); }
+.source { margin-top: 32px; font-size: .95rem; color: var(--muted); }
+
+.get { background: var(--ink); color: #fff; }
+.get-grid { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: clamp(28px, 6vw, 88px); align-items: center; }
+.get p { margin-top: 18px; color: #cfcfee; max-width: 52ch; }
+.get-actions { display: flex; flex-direction: column; gap: 14px; align-items: stretch; }
+.get-actions small { color: #b4b4dc; font-size: .95rem; text-align: center; }
+
+.foot { background: var(--ink); color: #a9a9d2; font-size: .95rem; border-top: 1px solid rgba(255,255,255,.14); }
+.foot .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; padding-block: 26px; }
+.foot a { text-underline-offset: 4px; }
+
+[hidden] { display: none !important; }
+
+/* ---------- small screens ---------- */
+@media (max-width: 960px) {
+  .hero, .why, .features, .get-grid { grid-template-columns: minmax(0, 1fr); }
+  .hero h1 { max-width: 16ch; }
+  .masthead nav { display: none; }
+}
+@media (max-width: 720px) {
+  body { font-size: 1.0625rem; }
+  .steps, .safe { grid-template-columns: minmax(0, 1fr); }
+  .feature-list div { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .shots img { height: auto; width: 100%; max-width: 300px; }
+}
+@media (max-width: 560px) {
+  .demo { grid-template-columns: minmax(0, 1fr); max-width: 320px; margin-inline: auto; }
+  .screen { min-height: 0; }
+  .code-face { padding: 24px 0 10px; }
+  .calls li { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .ring .sweep { transition: none; }
+  .result[data-state] { animation: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <header class="wrap masthead">
+    <a class="brand" href="#top" aria-label="Staff Verify, back to top">
+      <span class="brand-mark" data-icon-slot>
+        <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" fill="#fff"/><rect x="13" y="17" width="38" height="30" rx="6" fill="#4338ca"/><circle cx="24.5" cy="28.5" r="4.5" fill="#fff"/><path d="M17.5 41c1-4.2 3.6-6.2 7-6.2s6 2 7 6.2z" fill="#fff"/><path d="M35.5 32.5l4 4 7-8" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+      Staff Verify
+    </a>
+    <nav aria-label="On this page">
+      <a href="#how">How it works</a>
+      <a href="#features">Features</a>
+      <a href="#security">Security</a>
+      <a href="#get">Get the app</a>
+    </nav>
+  </header>
+
+  <main id="top">
+  <section class="wrap hero">
+    <div>
+      <h1>Confirm someone works where they say they do, in seconds.</h1>
+      <p class="hero-sub">Staff Verify gives every member of staff a six-digit code that changes each minute. When a colleague calls, they read it out and you check it.</p>
+      <div class="hero-actions">
+        <a class="btn btn-light" href="https://play.google.com/store/apps/details?id=com.djblaw.djbvalidator&hl=en">Get it on Google Play</a>
+        <a class="btn btn-outline-light" href="#how">See how it works</a>
+      </div>
+    </div>
+
+    <div class="demo" aria-label="Interactive demonstration of a verification">
+      <div class="demo-col">
+        <p class="demo-who">The caller's phone</p>
+        <div class="phone"><div class="screen">
+          <div class="app-bar">
+            <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="15" fill="#4338ca"/><path d="M19 33l9 9 17-20" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Staff Verify
+          </div>
+          <p class="screen-title">Your code</p>
+          <p class="screen-note">Signed in as Priya Shah</p>
+          <div class="code-face">
+            <div class="ring">
+              <svg viewBox="0 0 120 120" aria-hidden="true">
+                <circle class="track" cx="60" cy="60" r="52"/>
+                <circle class="sweep" id="sweep" cx="60" cy="60" r="52"/>
+              </svg>
+              <div class="ring-num"><div><span id="secs">60</span><small>seconds left</small></div></div>
+            </div>
+            <div class="code" id="code" aria-label="Current code"><span>000</span><span>000</span></div>
+          </div>
+        </div></div>
+      </div>
+
+      <div class="demo-col">
+        <p class="demo-who">Your phone</p>
+        <div class="phone"><div class="screen">
+          <div class="app-bar">
+            <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="15" fill="#4338ca"/><path d="M19 33l9 9 17-20" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Staff Verify
+          </div>
+          <p class="screen-title">Verify a caller</p>
+          <span class="field-label">Who is calling?</span>
+          <div class="fake-search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+            Priya
+          </div>
+          <div class="person">
+            <span class="avatar" aria-hidden="true">PS</span>
+            <div><b>Priya Shah</b><span>Finance</span></div>
+          </div>
+          <form id="verify-form" novalidate>
+            <label class="field-label" for="entry">The code they read out</label>
+            <input class="code-input" id="entry" inputmode="numeric" autocomplete="off" maxlength="6" placeholder="000000" aria-describedby="result">
+            <button class="check-btn" type="submit">Check code</button>
+          </form>
+          <div class="result" id="result" role="status" aria-live="polite">
+            <span>Type the six digits from the caller's phone.</span>
+          </div>
+        </div></div>
+      </div>
+
+      <p class="demo-caption">Try it: type the code from the left phone into the right one, or <button type="button" id="autofill">fill it in for me</button>. This is an illustration with an example name, not the live app.</p>
+    </div>
+  </section>
+  </main>
+</div>
+
+<section class="band" aria-labelledby="why-h">
+  <div class="wrap why">
+    <h2 id="why-h">A confident voice is not proof of identity.</h2>
+    <div class="why-body">
+      <p>Voice phishing works because phone calls carry no proof. A caller gives a familiar name, sounds like they belong, and asks for something reasonable. The person answering has nothing to check against.</p>
+      <p>Staff Verify adds that check. It takes a few seconds, it does not rely on recognising a voice, and it gives the person answering a clear reason to pause when the code is wrong.</p>
+      <ul class="calls" aria-label="Calls worth checking">
+        <li><b>IT support</b><span>“I need to reset your password or approve a sign-in.”</span></li>
+        <li><b>Finance</b><span>“Can you change these payment details today?”</span></li>
+        <li><b>A colleague</b><span>“Send me that file, I can't get into my email.”</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="band band-mist" id="how" aria-labelledby="how-h">
+  <div class="wrap">
+    <h2 id="how-h">One phone call, three steps.</h2>
+    <ol class="steps">
+      <li>
+        <h3>The caller reads out their code</h3>
+        <p>They open Staff Verify and say the six digits on screen. The code is replaced every 60 seconds.</p>
+      </li>
+      <li>
+        <h3>You find them by name</h3>
+        <p>Search the staff list in your own app and enter the code you were given.</p>
+      </li>
+      <li>
+        <h3>The app answers straight away</h3>
+        <p>A match confirms the caller is who they say they are. No match means stop and check another way.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="band" id="features" aria-labelledby="feat-h">
+  <div class="wrap features">
+    <div>
+      <h2 id="feat-h">What is in the app.</h2>
+      <p class="lede">Built to be opened in the middle of a phone call, so there is very little to learn.</p>
+    </div>
+    <dl class="feature-list">
+      <div><dt>Codes that expire in a minute</dt><dd>Each signed-in person gets a fresh six-digit code every 60 seconds, so a code that is overheard or written down soon stops working.</dd></div>
+      <div><dt>Instant check by name</dt><dd>Search for a member of staff, enter their code and get a clear answer on the spot.</dd></div>
+      <div><dt>Microsoft sign-in</dt><dd>Staff sign in with their Microsoft (Azure AD) work account. Accounts are set up by your administrator.</dd></div>
+      <div><dt>Biometric unlock</dt><dd>The app opens with the phone's own biometric unlock, so it is quick to reach during a call.</dd></div>
+      <div><dt>Your organisation's branding</dt><dd>The interface carries your organisation's identity, so staff recognise it as their own tool.</dd></div>
+    </dl>
+  </div>
+
+  <div class="wrap" id="shots-block" hidden>
+    <div class="shots" id="shots" aria-label="Screenshots of the app"></div>
+  </div>
+</section>
+
+<section class="band band-mist" id="security" aria-labelledby="sec-h">
+  <div class="wrap">
+    <h2 id="sec-h">Closed by design.</h2>
+    <ul class="safe">
+      <li>
+        <h3>Invitation only</h3>
+        <p>It is an internal tool. Nobody can use it without an account provisioned by an administrator.</p>
+      </li>
+      <li>
+        <h3>Nothing shared with third parties</h3>
+        <p>The app does not share user data with other companies or organisations.</p>
+      </li>
+      <li>
+        <h3>Encrypted in transit</h3>
+        <p>Data moving between the app and the service is encrypted.</p>
+      </li>
+    </ul>
+    <p class="source">Data handling as declared in the app's Google Play data safety section.</p>
+  </div>
+</section>
+
+<section class="band get" id="get" aria-labelledby="get-h">
+  <div class="wrap get-grid">
+    <div>
+      <h2 id="get-h">Available now.</h2>
+      <p>Staff Verify is published on Google Play for Android, with a web sign-in at staffverify.me. Organisations are enrolled by the developer, and staff accounts are then provisioned by an administrator.</p>
+    </div>
+    <div class="get-actions">
+      <a class="btn btn-light" href="https://play.google.com/store/apps/details?id=com.djblaw.djbvalidator&hl=en">Get it on Google Play</a>
+      <a class="btn btn-outline-light" href="https://www.staffverify.me/">Open staffverify.me</a>
+      <small>Play listing last updated 14 October 2026</small>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="wrap">
+    <span>Staff Verify</span>
+    <span>Developed by Davitt Jones Bould</span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+  var PERIOD = 60;
+  var CIRC = 2 * Math.PI * 52;
+  var sweep = document.getElementById("sweep");
+  var secsEl = document.getElementById("secs");
+  var codeEl = document.getElementById("code");
+  var entry = document.getElementById("entry");
+  var result = document.getElementById("result");
+  var form = document.getElementById("verify-form");
+  var current = "";
+  var endsAt = 0;
+
+  var ICON_OK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M7.5 12.5l3 3 6-7"/></svg>';
+  var ICON_NO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8.5 8.5l7 7M15.5 8.5l-7 7"/></svg>';
+
+  sweep.style.strokeDasharray = CIRC;
+
+  function newCode() {
+    var n;
+    try {
+      var buf = new Uint32Array(1);
+      window.crypto.getRandomValues(buf);
+      n = buf[0] % 1000000;
+    } catch (e) {
+      n = Math.floor(Math.random() * 1000000);
+    }
+    return ("000000" + n).slice(-6);
+  }
+
+  function setResult(state, html) {
+    if (state) { result.setAttribute("data-state", state); } else { result.removeAttribute("data-state"); }
+    result.innerHTML = html;
+  }
+
+  function rotate() {
+    var hadAnswer = result.hasAttribute("data-state");
+    current = newCode();
+    endsAt = Date.now() + PERIOD * 1000;
+    codeEl.innerHTML = "<span>" + current.slice(0, 3) + "</span><span>" + current.slice(3) + "</span>";
+    codeEl.setAttribute("aria-label", "Current code " + current.split("").join(" "));
+    if (hadAnswer || entry.value) {
+      entry.value = "";
+      setResult("", "<span>That code has been replaced. Type the new one.</span>");
+    }
+  }
+
+  function tick() {
+    var left = Math.ceil((endsAt - Date.now()) / 1000);
+    if (left <= 0) { rotate(); left = PERIOD; }
+    secsEl.textContent = left;
+    sweep.style.strokeDashoffset = CIRC * (1 - left / PERIOD);
+  }
+
+  function check() {
+    var typed = entry.value.replace(/\D/g, "");
+    if (typed.length < 6) {
+      setResult("", "<span>Enter all six digits, then check the code.</span>");
+      return;
+    }
+    if (typed === current) {
+      setResult("ok", ICON_OK + "<span><b>Verified</b>This is Priya Shah's current code.</span>");
+    } else {
+      setResult("no", ICON_NO + "<span><b>No match</b>Do not act on the request. Check the caller another way.</span>");
+    }
+  }
+
+  entry.addEventListener("input", function () {
+    entry.value = entry.value.replace(/\D/g, "").slice(0, 6);
+    if (result.hasAttribute("data-state")) {
+      setResult("", "<span>Type the six digits from the caller's phone.</span>");
+    }
+  });
+  form.addEventListener("submit", function (e) { e.preventDefault(); check(); });
+  document.getElementById("autofill").addEventListener("click", function () {
+    entry.value = current;
+    check();
+  });
+
+  rotate();
+  tick();
+  setInterval(tick, 250);
+
+  /* Optional images: drop files into uploads/ and they appear. Missing files are ignored. */
+  function probe(src, onFound) {
+    var img = new Image();
+    img.onload = function () { onFound(img); };
+    img.src = src;
+  }
+
+  probe("uploads/icon.png", function (img) {
+    img.alt = "";
+    var slots = document.querySelectorAll("[data-icon-slot]");
+    for (var i = 0; i < slots.length; i++) {
+      slots[i].innerHTML = "";
+      slots[i].appendChild(i === 0 ? img : img.cloneNode());
+    }
+  });
+
+  var shotAlts = {
+    "uploads/screenshot-1.png": "Staff Verify showing a member of staff's current six-digit code",
+    "uploads/screenshot-2.png": "Staff Verify checking a caller's code against their name"
+  };
+  Object.keys(shotAlts).forEach(function (src, i) {
+    probe(src, function (img) {
+      img.alt = shotAlts[src];
+      img.style.order = i;
+      document.getElementById("shots").appendChild(img);
+      document.getElementById("shots-block").hidden = false;
+    });
+  });
+})();
+</script>
+</body>
+</html>
